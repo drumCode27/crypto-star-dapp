@@ -131,4 +131,39 @@ describe("StarNotary Contract", () => {
             assert.equal(actualError, expectedError);
         });
     });
+
+    describe("transferStar()", () => {
+        it('should transfer a star owned by the sender to another address', async() => {
+            const instance = await StarNotary.deployed();
+            const user1 = accounts[1];
+            const user2 = accounts[2];
+            const starId = 31;
+            
+            await instance.createStar('awesome star 1', starId, {from: user1});
+            await instance.transferStar(user2, starId, {from: user1});
+            
+            assert.equal(await instance.ownerOf(starId), user2);
+        });
+
+        it('should not transfer star if sender does not own the star', async() => {
+            const instance = await StarNotary.deployed();
+            const user1 = accounts[1];
+            const user2 = accounts[2];
+            const starId = 32;
+            
+            await instance.createStar('awesome star 1', starId, {from: user1});
+
+            const expectedError = "Sender must own star for tokenId!";
+            let actualError = "";
+            try
+            {
+                await instance.transferStar(user1, starId, {from: user2});
+            }
+            catch (e)  {
+                actualError = e.reason;
+            };
+
+            assert.equal(actualError, expectedError);
+        });
+    });
 });
