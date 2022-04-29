@@ -9,11 +9,25 @@ describe("StarNotary Contract", () => {
         accounts = accs;
         owner = accounts[0];
     });
+
+    describe("constructor()", () => {
+        it('should set the correct name', async() => {
+            const instance = await StarNotary.deployed();
+            const name = await instance.name({from: accounts[0]})
+            assert.equal(name, 'StarNotary')
+        });
+
+        it('should set the correct symbol', async() => {
+            const instance = await StarNotary.deployed();
+            const symbol = await instance.symbol({from: accounts[0]})
+            assert.equal(symbol, 'SNT')
+        });
+    });
     
     describe("createStar()", () => {
         it('should create star', async() => {
-            let tokenId = 1;
-            let instance = await StarNotary.deployed();
+            const tokenId = 1;
+            const instance = await StarNotary.deployed();
             await instance.createStar('Awesome Star!', tokenId, {from: accounts[0]})
             assert.equal(await instance.tokenIdToStarInfo.call(tokenId), 'Awesome Star!')
         });
@@ -21,10 +35,10 @@ describe("StarNotary Contract", () => {
 
     describe("putStarUpForSale()", () => {
         it('should be able to get star price after putting up for sale', async() => {
-            let instance = await StarNotary.deployed();
-            let user1 = accounts[1];
-            let starId = 2;
-            let starPrice = web3.utils.toWei(".01", "ether");
+            const instance = await StarNotary.deployed();
+            const user1 = accounts[1];
+            const starId = 2;
+            const starPrice = web3.utils.toWei(".01", "ether");
             await instance.createStar('awesome star', starId, {from: user1});
             await instance.putStarUpForSale(starId, starPrice, {from: user1});
             assert.equal(await instance.starsForSale.call(starId), starPrice);
@@ -33,30 +47,30 @@ describe("StarNotary Contract", () => {
 
     describe("buyStar()", () => {
         it('should increase balance of user selling the star equal to star price', async() => {
-            let instance = await StarNotary.deployed();
-            let user1 = accounts[1];
-            let user2 = accounts[2];
-            let starId = 3;
-            let starPrice = web3.utils.toWei(".01", "ether");
-            let balance = web3.utils.toWei(".05", "ether");
+            const instance = await StarNotary.deployed();
+            const user1 = accounts[1];
+            const user2 = accounts[2];
+            const starId = 3;
+            const starPrice = web3.utils.toWei(".01", "ether");
+            const balance = web3.utils.toWei(".05", "ether");
             await instance.createStar('awesome star', starId, {from: user1});
             await instance.putStarUpForSale(starId, starPrice, {from: user1});
-            let balanceOfUser1BeforeTransaction = await web3.eth.getBalance(user1);
+            const balanceOfUser1BeforeTransaction = await web3.eth.getBalance(user1);
             await instance.buyStar(starId, {from: user2, value: balance});
-            let balanceOfUser1AfterTransaction = await web3.eth.getBalance(user1);
-            let value1 = Number(balanceOfUser1BeforeTransaction) + Number(starPrice);
-            let value2 = Number(balanceOfUser1AfterTransaction);
+            const balanceOfUser1AfterTransaction = await web3.eth.getBalance(user1);
+            const value1 = Number(balanceOfUser1BeforeTransaction) + Number(starPrice);
+            const value2 = Number(balanceOfUser1AfterTransaction);
             assert.equal(value1, value2);
         });
 
         it('should decrease balance from user buying star equal to star price (plus gas fee)', async() => {
-            let instance = await StarNotary.deployed();
-            let user1 = accounts[1];
-            let user2 = accounts[2];
-            let starId = 5;
-            let starPrice = web3.utils.toWei(".01", "ether");
+            const instance = await StarNotary.deployed();
+            const user1 = accounts[1];
+            const user2 = accounts[2];
+            const starId = 5;
+            const starPrice = web3.utils.toWei(".01", "ether");
             const gasPrice = web3.utils.toWei(".000001", "ether");
-            const maxFee = "10";
+            const maxFee = "300000000";
             const maxFeeInWei =  web3.utils.toWei(maxFee, "gwei");
             const maxTotalCost = Number(starPrice) + Number(maxFeeInWei);
             await instance.createStar('awesome star', starId, {from: user1});
